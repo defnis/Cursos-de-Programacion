@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=1, initial-scale=1.0">
+    <link rel="stylesheet" href="css/bootstrap.css">
+    <link rel="stylesheet" href="css/datatables.min.css">
+    <script src="js/jquery-3.6.0.min"></script>
+    <script src="js/datatables.min"></script>
+    <script src="js/popper.min"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/bootstrap.min.js.map"></script>
+
+    <title>articulos Piuque Lom</title>
+</head>
+<body>
+   
+    <div class="container">
+        <h1>Reserva Piuque Lom</h1>
+        <div class="col1-12">
+            <table class="table table-striped table-bordered table-hover" id="tablaarticulos">
+                <thead>
+                    <tr>
+                        <td>ID</td>
+                        <td>Nombre</td>
+                        <td>Precio</td>
+                        <td>Modificar</td>
+                        <td>Eliminar</td>
+                    </tr>
+                </thead>
+            </table>
+            <button class="btn btn-sm btn-primary" id="btnAgregar">Agregar Articulo</button>
+        </div>
+    </div>
+
+    <!-- Formulario para agregar o Modificar -->
+    <div class="modal fade" id="formularioarticulos" tabindex="-1" role="dialog">
+        <div class="modal-dialog" role="document">
+            <div class="modal-contnent">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">
+                        <span aria-hidden="true">x</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="id"> <!-- Hidden de tipo oculto-->
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label>Nombre:</label>
+                            <input type="text" id="nombre" class="form-control" placeholder="">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label>Precio:</label>
+                            <input type="number" id="precio" class="form-control" placeholder="">
+
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="confirmarAgregar" class="btn btn-success">Agregar</button>
+                    <button type="button" id="confirmarModificar" class="btn btn-success">Modificar</button>
+                    <button type="button" class="btn btn-success" data-dismiss="modal">Cancelar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let tabla1 =$("#tablaarticulos").DataTable({
+            "ajax":{             // Con ajax vamos a conectar al servior
+                url: "datos.php?accion=listar",     // y le enviamos los datos de conexion.
+                dataSrc: ""
+            }, 
+                "colums": [{
+                "data": "id"
+            },
+            {
+                "data": "nombre"
+            }, 
+            {
+                "data": "precio"
+            },
+            {
+                "data": null,
+                "orderable": false
+            },
+            {
+                "data": null,
+                "orderable": false
+            }],
+            "columnDefs": [{
+                targets: 3,
+                "defaultContent": "<button class='btn btn-sn btn-primary botonmodificar'>Modificar</button>",
+                data: null
+            },
+            {
+                targets: 4,
+                "defaultContent": "<button class='btn btn-sn btn-primary botonborrar'>Borrar</button>",
+                data: null   
+            }],
+            "language": {
+                "url": "DataTables/spanish.json",
+            }
+        });
+
+        // Funciones que interactuan con el formolario de entrada.
+        function limpiarFormulario(){
+            $('#id').val('');
+            $('#nombre').val('');
+            $('#precio').val('');
+        }
+        function recuperarDatosFormulario(){
+            let registro = {
+                id: $('#id').val(''),
+                nombre: $('#nombre').val(''),
+                precio: $('#precio').val(''),
+            };
+            return registro;
+        }
+
+        // Eventos de Botones.
+        $('#btnAgregar').click(function(){
+            $('#confirmarAgregar').show();
+            $('#confirmarModificar').hide();
+            limpiarFormulario();
+            $("#formularioarticulos").modal('show');
+        });
+        $('confirmarAgregar').click(function(){
+            $("#formularioarticulos").modal('hide');
+            let registro = recuperarDatosFormulario();
+            agregarRegistro(registro);
+        });
+
+        $('#confirmarAgregar').click(function(){  //Cuando hacemos click en Agregar se oculta el formulario.
+            $("#formularioReserva").modal('hide');
+        });
+
+        // Funciones que sirven para limpiar el registro.
+        function limpiarFormulario(){
+            $('#id').val('');
+            $('#nombre').val('');
+            $('#precio').val('');
+        }
+
+        function recuperarDatosFormulario(){
+            let registro = {    //Nos permite almacenar los registros en una sola variable.
+                id: $('#id').val(),
+                nombre: $('#nombre').val(),
+                precio: $('#precio').val(),
+            };
+            return registro;
+        }
+
+        //Funciones que se comunican con el server a travez de AJAX
+        function agregarRegistro(registro){
+            $.ajax({
+                type: 'POST',  //Quiero qu sea de tipo POST
+                url: "datos.php?accion=agregar", 
+                data: registro,   //Que datos quiero que envies.
+                success: function(msg){
+                    tabla1.ajax.reload();   //Quiero que recargues la tabla.
+                },
+                error: function(){
+                    alert("Hubo un problema al agregar el registro");
+                }
+            })
+        }
+
+        function borrarRegistro(id){
+            $.ajax({
+                type: 'GET',  //Quiero obtener el ID del elemento a eliminar.
+                url: "datos.php?accion=borrar&id=" + id, 
+                data: '',  
+                success: function(msg){
+                    tabla1.ajax.reload();   
+                },
+                error: function(){
+                    alert("Hubo un problema al borrar el registro");
+                }
+            })
+        }
+
+    </script>
+</body>
+</html>
