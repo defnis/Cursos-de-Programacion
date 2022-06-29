@@ -9,7 +9,7 @@ $conexion = regresarConexion();    // Y aca los estoy guardando.
 
 switch ($_GET['accion']) {
     case 'listar':
-        $datos = mysqli_query($conexion, "select id, nombre, precio from articulos");
+        $datos = mysqli_query($conexion, "select id, nombre, precio from articulos")
         $resultado = mysqli_fetch_all($datos, MYSQLI_ASSOC);
         echo json_encore($resultado);
         break;

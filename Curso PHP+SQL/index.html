@@ -75,7 +75,9 @@
                 dataSrc: ""
             }, 
                 "colums": [{
-                "data": "id"
+                "data": "id",
+                "className": "text-center",
+                "width": "5%"   //Modificar el ancho de nombre de la tabla.
             },
             {
                 "data": "nombre"
@@ -103,8 +105,20 @@
             }],
             "language": {
                 "url": "DataTables/spanish.json",
+            },
+            'rowCallback': function(row, data, index){
+                if(parseFloat(data.precio) < 50){  //Todos los que son menores de 50 estan en color rojo.
+                    $(row).find('td:eq(2)').css('color', 'red'); 
+                }
             }
         });
+
+        $('#tablaarticulos tbody').on('click', "button.botonborrar", function(){  //Creamos el evento click,  cuando hacemos click que pasa.
+            if(confirm("Seguro que quieres eliminar este articulo?")) {
+                let registro = tabla1.row($(this).parents('tr')).data();
+                borrarRegistro(registro.id);  //De este registro que obtube todos los datos solo le voy a enviar el ID.  
+            }
+        })
 
         // Funciones que interactuan con el formolario de entrada.
         function limpiarFormulario(){
@@ -129,8 +143,17 @@
             $("#formularioarticulos").modal('show');
         });
         $('confirmarAgregar').click(function(){
-            $("#formularioarticulos").modal('hide');
+            $("#formularioArticulos").modal('hide');
             let registro = recuperarDatosFormulario();
+            if (registro.nombre==''){
+                alert("El nombre del articulo no puede estar vacio")
+                return;
+            }
+            if (registro.precio==''){
+                alert("El precio no puede estar vacio");
+                return;
+            } //No agregare el articulo hasta que el nombre y precio no esten vacios.
+            $("#formularioArticulo").modal('hide');
             agregarRegistro(registro);
         });
 
